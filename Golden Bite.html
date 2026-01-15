@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Golden Bite — Customer & Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {font-family:'Inter',sans-serif;background:linear-gradient(180deg,#ff2d2d 0%,#0b0b0c 100%);color:#fff;margin:0;}
+    header {background:#101114;padding:20px;text-align:center;}
+    header h1 {color:#ffd84d;margin:0;}
+    nav button {background:#ff2d2d;border:none;padding:10px 16px;border-radius:999px;color:#fff;font-weight:600;cursor:pointer;margin:5px;}
+    main {padding:20px;}
+    .hidden {display:none;}
+    .grid {display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
+    .card {background:#20161a;border-radius:12px;overflow:hidden;}
+    .card img {width:100%;height:160px;object-fit:cover;}
+    .card h4 {margin:10px;color:#ffd84d;}
+    .card .price {margin:0 10px 10px;font-weight:700;color:#ff2d2d;}
+    .card button {margin:10px;padding:8px;background:#ffd84d;border:none;border-radius:8px;font-weight:600;cursor:pointer;}
+    .cart,.panel {background:#16171a;padding:20px;border-radius:12px;margin:20px 0;}
+    .cart h3,.panel h2 {color:#ffd84d;margin-top:0;}
+    .cart ul,.list {list-style:none;padding:0;margin:0;}
+    .cart li,.item {display:flex;justify-content:space-between;margin:6px 0;}
+    .cart li button,.item button {background:#ff2d2d;border:none;color:#fff;padding:4px 8px;border-radius:6px;cursor:pointer;}
+    input,select {width:100%;padding:10px;margin:8px 0;border-radius:8px;border:none;background:#20161a;color:#fff;}
+    button.action {background:#ffd84d;color:#0b0b0c;font-weight:600;border:none;border-radius:8px;padding:10px 16px;cursor:pointer;margin-top:10px;}
+    footer {background:#101114;padding:20px;text-align:center;color:#bfc4ce;}
+    footer h4 {color:#ffd84d;}
+    .login {text-align:center;padding:40px;}
+    .login input {padding:10px;border-radius:8px;border:none;background:#20161a;color:#fff;}
+    .login button {margin-top:10px;padding:10px 16px;background:#ffd84d;color:#0b0b0c;border:none;border-radius:8px;font-weight:600;cursor:pointer;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="siteTitle">Golden Bite</h1>
+    <nav>
+      <button onclick="showSlide('customer')">Customer</button>
+      <button onclick="promptAdmin()">Admin</button>
+    </nav>
+  </header>
+
+  <!-- CUSTOMER PANEL -->
+  <main id="customer">
+    <section class="grid" id="productGrid"></section>
+    <section class="cart">
+      <h3>Your Order</h3>
+      <ul id="cartItems"></ul>
+      <div><span>Subtotal</span> <strong id="subtotal">$0.00</strong></div>
+      <div><span>Tax (8%)</span> <strong id="tax">$0.00</strong></div>
+      <div><span>Total</span> <strong id="total">$0.00</strong></div>
+      <h4>Customer Details</h4>
+      <input id="custName" placeholder="Full Name">
+      <input id="custPhone" type="tel" placeholder="Phone Number">
+      <input id="custAddress" placeholder="Delivery Address">
+      <input id="custDistance" type="number" placeholder="Distance from Restaurant (km)">
+      <h4>Delivery Time</h4>
+      <select id="deliveryTime" onchange="toggleCustomTime()">
+        <option value="now">Now</option>
+        <option value="1h">In 1 Hour</option>
+        <option value="custom">Custom</option>
+      </select>
+      <input id="customTime" type="time" class="hidden">
+      <h4>Payment Method</h4>
+      <select id="paymentMethod" onchange="togglePaymentDetails()"></select>
+      <div id="cardDetails" class="hidden">
+        <input id="cardNumber" placeholder="Card Number">
+        <input id="cardExpiry" type="month" placeholder="Expiry Date">
+        <input id="cardCVV" type="number" placeholder="CVV">
+      </div>
+      <button class="action" onclick="checkout()">Checkout</button>
+    </section>
+    <footer>
+      <h4>Opening Hours</h4>
+      <p id="hoursDisplay"></p>
+    </footer>
+  </main>
+
+  <!-- ADMIN PANEL -->
+  <main id="admin" class="hidden">
+    <div id="loginSection" class="login">
+      <p>Enter admin password:</p>
+      <input type="password" id="adminPass" placeholder="Password">
+      <button onclick="checkLogin()">Login</button>
+    </div>
+    <div id="adminContent" class="hidden">
+      <div class="panel">
+        <h2>Restaurant Info</h2>
+        <input id="restName" placeholder="Restaurant Name">
+        <input id="restEmail" placeholder="Email">
+        <input id="restPhone" placeholder="Phone">
+        <input id="restDistance" type="number" placeholder="Max Delivery Distance (km)">
+        <input id="restFee" type="number" placeholder="Delivery Fee">
+        <input id="currency" placeholder="Currency">
+        <input id="restLogo" placeholder="Logo URL">
+        <button onclick="saveRestaurant()">Save Info</button>
+        <div id="restDisplay"></div>
+        <div id="logoPreview"></div>
+      </div>
+      <div class="panel">
+        <h2>Products</h2>
+        <input id="prodName" placeholder="Product Name">
+        <input id="prodPrice" type="number" placeholder="Price">
+        <input id="prodImage" placeholder="Image URL">
+        <button onclick="addProduct()">Add Product</button>
+        <div id="productList"></div>
+      </div>
+      <div class="panel">
+        <h2>Payment Methods</h2>
+        <input id="payMethod" placeholder="New Payment Method">
+        <button onclick="addPayment()">Add Method</button>
+        <div id="paymentList"></div>
+      </div>
+      <div class="panel">
+        <h2>Opening Hours</h2>
+        <input id="openTime" type="time">
+        <input id="closeTime" type="time">
+        <button onclick="saveHours()">Save Hours</button>
+        <p id="hoursDisplayAdmin"></p>
+      </div>
+      <div class="panel">
+        <h2>Incoming Orders</h2>
+        <div class="list" id="orderList"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function showSlide(id){document.getElementById('customer').classList.add('hidden');document.getElementById('admin').classList.add('hidden');document.getElementById(id).classList.remove('hidden');}
+    function promptAdmin(){showSlide('admin');}
+    function checkLogin(){const pass=document.getElementById("adminPass").value;if(pass==="goldenbite"){document.getElementById("loginSection").classList.add("hidden");document.getElementById("adminContent").classList.remove("hidden");}else{alert("Access denied!");}}
+
+    let products=[{name:"Double Crunch Burger",price:6.99,image:"assets/img/double-crunch.jpg"},{name:"Classic Fries",price:2.49,image:"assets/img/fries.jpg"},{name:"Cola",price:1.69,image:"assets/img/cola.jpg"},{name:"Cheese Pizza",price:8.99,image:"assets/img/pizza.jpg"},{name:"Chicken Wrap",price:5.49,image:"assets/img/wrap.jpg"}];
+    let payments=["Visa","Mastercard","Cash","American Express"];
+    let hours={open:"09:00",close:"23:00"};
+    let restaurant={distance:10,currency:"USD"};
+        let orders=[];let cart=[];
+
+    // CUSTOMER PANEL FUNCTIONS
+    function renderProducts() {
+      const grid = document.getElementById("productGrid");
+      grid.innerHTML = "";
+      products.forEach((p,i) => {
+        grid.innerHTML += `
+          <div class="card">
+            <img src="${p.image}" alt="${p.name}">
+            <h4>${p.name}</h4>
+            <p class="price">${p.price.toFixed(2)} ${restaurant.currency||'USD'}</p>
+            <button onclick="addToCart(${i})">Add to Cart</button>
+          </div>`;
+      });
+    }
+
+    function addToCart(index){
+      const product = products[index];
+      cart.push({name:product.name, price:product.price});
+      renderCart();
+    }
+
+    function renderCart(){
+      const list=document.getElementById("cartItems");
+      list.innerHTML="";
+      let subtotal=0;
+      cart.forEach((item,i)=>{
+        subtotal+=item.price;
+        list.innerHTML+=`<li>${item.name} - ${item.price.toFixed(2)} ${restaurant.currency||'USD'} 
+          <button onclick="removeFromCart(${i})">X</button></li>`;
+      });
+      const tax=subtotal*0.08,total=subtotal+tax;
+      document.getElementById("subtotal").textContent=`${subtotal.toFixed(2)} ${restaurant.currency||'USD'}`;
+      document.getElementById("tax").textContent=`${tax.toFixed(2)} ${restaurant.currency||'USD'}`;
+      document.getElementById("total").textContent=`${total.toFixed(2)} ${restaurant.currency||'USD'}`;
+    }
+
+    function removeFromCart(i){
+      cart.splice(i,1);
+      renderCart();
+    }
+
+    function toggleCustomTime(){
+      const sel=document.getElementById("deliveryTime").value;
+      document.getElementById("customTime").classList.toggle("hidden",sel!=="custom");
+    }
+
+    function togglePaymentDetails(){
+      const method=document.getElementById("paymentMethod").value.toLowerCase();
+      if(method.includes("visa")||method.includes("credit")||method.includes("debit")||method.includes("american")){
+        document.getElementById("cardDetails").classList.remove("hidden");
+      } else {
+        document.getElementById("cardDetails").classList.add("hidden");
+      }
+    }
+
+    function checkout(){
+      if(cart.length===0){alert("Cart empty!");return;}
+
+      // Distance validation
+      const dist=parseFloat(document.getElementById("custDistance").value);
+      if(restaurant.distance && dist > restaurant.distance){
+        alert("Maximum delivery distance exceeded!");
+        return;
+      }
+
+      const name=document.getElementById("custName").value;
+      const phone=document.getElementById("custPhone").value;
+      const addr=document.getElementById("custAddress").value;
+      const delivery=document.getElementById("deliveryTime").value==="custom" 
+        ? document.getElementById("customTime").value 
+        : document.getElementById("deliveryTime").value;
+      const method=document.getElementById("paymentMethod").value;
+
+      // If card payment, validate card fields
+      if(!document.getElementById("cardDetails").classList.contains("hidden")){
+        const cardNum=document.getElementById("cardNumber").value;
+        const cardExp=document.getElementById("cardExpiry").value;
+        const cardCVV=document.getElementById("cardCVV").value;
+        if(!cardNum || !cardExp || !cardCVV){
+          alert("Please fill in card details.");
+          return;
+        }
+      }
+
+      alert(`Order placed!\nName: ${name}\nPhone: ${phone}\nAddress: ${addr}\nDelivery: ${delivery}\nPayment: ${method}\nItems: ${cart.length}`);
+
+      // Save order for admin
+      orders.push({items:[...cart], name, phone, addr, delivery, payment:method, time:new Date().toLocaleString()});
+      localStorage.setItem("orders", JSON.stringify(orders));
+      cart=[];renderCart();renderOrders();
+    }
+
+    // ADMIN FUNCTIONS
+    function saveRestaurant() {
+      restaurant = {
+        name: document.getElementById("restName").value,
+        email: document.getElementById("restEmail").value,
+        phone: document.getElementById("restPhone").value,
+        distance: parseFloat(document.getElementById("restDistance").value),
+        fee: document.getElementById("restFee").value,
+        currency: document.getElementById("currency").value,
+        logo: document.getElementById("restLogo").value
+      };
+      localStorage.setItem("restaurant", JSON.stringify(restaurant));
+      renderRestaurant();
+    }
+
+    function renderRestaurant() {
+      if(restaurant.name) {
+        document.getElementById("siteTitle").textContent = restaurant.name;
+        document.getElementById("restDisplay").textContent =
+          `${restaurant.name} | ${restaurant.email} | ${restaurant.phone} | Delivery: ${restaurant.distance}km, Fee: ${restaurant.fee} ${restaurant.currency}`;
+      }
+      if(restaurant.logo) {
+        document.getElementById("logoPreview").innerHTML = `<img src="${restaurant.logo}" alt="Logo">`;
+      }
+    }
+
+    function addProduct() {
+      const name=document.getElementById("prodName").value;
+      const price=parseFloat(document.getElementById("prodPrice").value);
+      const image=document.getElementById("prodImage").value;
+      if(name && !isNaN(price)) {
+        products.push({name, price, image});
+        renderProducts();
+      }
+    }
+
+    function removeProduct(i){products.splice(i,1);renderProducts();}
+
+    function renderPayments() {
+      const list=document.getElementById("paymentList");
+      if(list){
+        list.innerHTML="";
+        payments.forEach((m,i)=>{
+          list.innerHTML+=`<div class="item">${m} <button onclick="removePayment(${i})">Delete</button></div>`;
+        });
+      }
+      document.getElementById("paymentMethod").innerHTML = payments.map(m=>`<option>${m}</option>`).join("");
+    }
+
+    function addPayment() {
+      const m=document.getElementById("payMethod").value;
+      if(m){payments.push(m);renderPayments();}
+    }
+
+    function removePayment(i){payments.splice(i,1);renderPayments();}
+
+    function saveHours() {
+      hours.open=document.getElementById("openTime").value;
+      hours.close=document.getElementById("closeTime").value;
+      localStorage.setItem("hours", JSON.stringify(hours));
+      renderHours();
+    }
+
+    function renderHours() {
+      document.getElementById("hoursDisplay").textContent=`${hours.open} - ${hours.close}`;
+      const adminHours=document.getElementById("hoursDisplayAdmin");
+      if(adminHours){adminHours.textContent=`${hours.open} - ${hours.close}`;}
+    }
+
+    function renderOrders() {
+      const list=document.getElementById("orderList");
+      list.innerHTML="";
+      orders.forEach(o=>{
+        list.innerHTML+=`<div class="item">Order at ${o.time} | ${o.items.length} items | ${o.payment} | ${o.name}, ${o.phone}, ${o.addr}, Delivery: ${o.delivery}</div>`;
+      });
+    }
+
+    // Initial render
+    renderProducts();
+    renderPayments();
+    renderHours();
+    renderRestaurant();
+    renderOrders();
+  </script>
+</body>
+</html>
